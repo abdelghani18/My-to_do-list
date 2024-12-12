@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة المهام اليومية</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      text-align: right;
+      margin: 20px;
+    }
+    .task {
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .task span {
+      flex-grow: 1;
+    }
+    button {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>إدارة المهام اليومية</h1>
+  <form id="taskForm">
+    <input type="text" id="taskInput" placeholder="اكتب مهمتك هنا..." required>
+    <select id="taskType">
+      <option value="مدرسية">مدرسية</option>
+      <option value="عمل">عمل</option>
+      <option value="صحة">صحة</option>
+    </select>
+    <button type="submit">إضافة المهمة</button>
+  </form>
+  <h2>قائمة المهام:</h2>
+  <div id="tasksContainer"></div>
+
+  <script>
+    const taskForm = document.getElementById("taskForm");
+    const taskInput = document.getElementById("taskInput");
+    const taskType = document.getElementById("taskType");
+    const tasksContainer = document.getElementById("tasksContainer");
+
+    // تحميل المهام من localStorage عند بداية تشغيل الموقع
+    const loadTasks = () => {
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      tasks.forEach(addTaskToDOM);
+    };
+
+    // إضافة مهمة إلى DOM
+    const addTaskToDOM = (task) => {
+      const taskElement = document.createElement("div");
+      taskElement.className = "task";
+      taskElement.innerHTML = `
+        <span>${task.text} - <strong>${task.type}</strong></span>
+        <button onclick="deleteTask(this, '${task.text}')">حذف</button>
+      `;
+      tasksContainer.appendChild(taskElement);
+    };
+
+    // إضافة مهمة جديدة
+    taskForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const task = {
+        text: taskInput.value,
+        type: taskType.value
+      };
+
+      // حفظ المهمة في localStorage
+      const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      tasks.push(task);
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+
+      // إضافتها إلى DOM
+      addTaskToDOM(task);
+
+      // تنظيف الحقول
+      taskInput.value = "";
+    });
+
+    // حذف مهمة
+    const deleteTask = (button, taskText) => {
+      // حذف المهمة من DOM
+      button.parentElement.remove();
+
+      // تحديث localStorage
+      let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+      tasks = tasks.filter(task => task.text !== taskText);
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    };
+
+    // تحميل المهام عند فتح الصفحة
+    loadTasks();
+  </script>
+</body>
+</html>
